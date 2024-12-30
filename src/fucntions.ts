@@ -51,8 +51,9 @@ export async function generateComments(fileContent: string): Promise<string | nu
             temperature: 0.7,
         }, {
             headers: {
-                'Authorization': `Bearer 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`}
-            
+                'Authorization': `Bearer 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`
+            }
+
         });
 
         const comments = (response.data as any).choices[0].text.trim();
@@ -83,7 +84,8 @@ export async function generateDescription(): Promise<string | null> {
             temperature: 0.7,
         }, {
             headers: {
-			'Authorization': `Bearer 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`            }
+                'Authorization': `Bearer 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`
+            }
         });
 
         const description = (response.data as any).choices[0].text.trim();
@@ -110,7 +112,7 @@ export async function commitAndPushChanges() {
 
         // Push changes to the repository
         await execPromise('git push');
-        
+
         console.log('Changes committed and pushed successfully');
     } catch (error) {
         console.error('Error committing and pushing changes:', error);
@@ -153,21 +155,24 @@ export function deactivate() {
 
 export function setCommitReminder() {
     if (lastCommitTime) {
-        const oneHour = 60 * 60 * 1000; // One hour in milliseconds
+        const oneHour = 1 * 10 * 1000; // One hour in milliseconds
         const timeSinceLastCommit = new Date().getTime() - lastCommitTime.getTime();
 
         if (timeSinceLastCommit >= oneHour) {
             vscode.window.showInformationMessage('It has been an hour since your last commit. Consider committing your changes.');
+            setCommitReminder();
         } else {
             const timeUntilReminder = oneHour - timeSinceLastCommit;
             setTimeout(() => {
                 vscode.window.showInformationMessage('It has been an hour since your last commit. Consider committing your changes.');
+                setCommitReminder();
             }, timeUntilReminder);
         }
     } else {
         // If no last commit time is set, set a reminder for one hour from now
         setTimeout(() => {
             vscode.window.showInformationMessage('It has been an hour since your last commit. Consider committing your changes.');
+            setCommitReminder();
         }, 60 * 60 * 1000);
     }
 }

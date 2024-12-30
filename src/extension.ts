@@ -6,155 +6,155 @@ import { v4 as uuidv4 } from 'uuid';
 import dotenv from 'dotenv';
 import util from 'util';
 
-import {setCommitReminder,calculate_score,generateComments,generateDescription,changeDescriptionLanguage,commitAndPushChanges, selectBranch,} from './fucntions';
+import { setCommitReminder, calculate_score, generateComments, generateDescription, changeDescriptionLanguage, commitAndPushChanges, selectBranch, } from './fucntions';
 dotenv.config();
 export let lastCommitTime: Date | null = null;
 const execPromise = util.promisify(exec);
 export let changes: { [key: string]: string[] } = {};
 export function clearChanges() {
-    console.log('Clearing changes:', changes);
-    changes = {};
+	console.log('Clearing changes:', changes);
+	changes = {};
 }
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
-    console.log('Congratulations, your extension "All Commit" is now active!');
+	console.log('Congratulations, your extension "All Commit" is now active!');
 
-    const helloWorldDisposable = vscode.commands.registerCommand('allcommit.helloWorld', () => {
-        const currentTime = new Date().toLocaleTimeString();
-        vscode.window.showInformationMessage('Welcome to All Commit!\nCurrent time: ' + currentTime);
-    });
+	const helloWorldDisposable = vscode.commands.registerCommand('allcommit.helloWorld', () => {
+		const currentTime = new Date().toLocaleTimeString();
+		vscode.window.showInformationMessage('Welcome to All Commit!\nCurrent time: ' + currentTime);
+	});
 
-    const saveCommitDisposable = vscode.commands.registerCommand('allcommit.saveCommit', async () => {
-        if (Object.keys(changes).length === 0) {
-            vscode.window.showInformationMessage('There is nothing to commit');
-            return;
-        }
+	const saveCommitDisposable = vscode.commands.registerCommand('allcommit.saveCommit', async () => {
+		if (Object.keys(changes).length === 0) {
+			vscode.window.showInformationMessage('There is nothing to commit');
+			return;
+		}
 
-        const commitDescription = await generateDescription();
-        if (!commitDescription) {
-            vscode.window.showErrorMessage('Failed to generate commit description');
-            return;
-        }
+		const commitDescription = await generateDescription();
+		if (!commitDescription) {
+			vscode.window.showErrorMessage('Failed to generate commit description');
+			return;
+		}
 
-        const currentTime = new Date().toLocaleString();
-        const activeEditor = vscode.window.activeTextEditor;
-        if (!activeEditor) {
-            vscode.window.showErrorMessage('No active editor found');
-            return;
-        }
+		const currentTime = new Date().toLocaleString();
+		const activeEditor = vscode.window.activeTextEditor;
+		if (!activeEditor) {
+			vscode.window.showErrorMessage('No active editor found');
+			return;
+		}
 
-        const fileName = path.basename(activeEditor.document.fileName);
-        const fileType = path.extname(activeEditor.document.fileName);
-        const commitId = uuidv4();
+		const fileName = path.basename(activeEditor.document.fileName);
+		const fileType = path.extname(activeEditor.document.fileName);
+		const commitId = uuidv4();
 
-        const commitInfo = `Commit ID: ${commitId}\nDate-Time: ${currentTime}\n`;
+		const commitInfo = `Commit ID: ${commitId}\nDate-Time: ${currentTime}\n`;
 
-        const commitLogPath = path.join(vscode.workspace.rootPath || '', 'commit_log.txt');
-        fs.appendFile(commitLogPath, commitInfo, (err) => { // Append to the file instead of overwriting
-            if (err) {
-                vscode.window.showErrorMessage('Failed to save commit information');
-                console.error(err);
-            } else {
-                vscode.window.showInformationMessage('Commit information saved successfully');
-                clearChanges();
+		const commitLogPath = path.join(vscode.workspace.rootPath || '', 'commit_log.txt');
+		fs.appendFile(commitLogPath, commitInfo, (err) => { // Append to the file instead of overwriting
+			if (err) {
+				vscode.window.showErrorMessage('Failed to save commit information');
+				console.error(err);
+			} else {
+				vscode.window.showInformationMessage('Commit information saved successfully');
+				clearChanges();
 				lastCommitTime = new Date();
 				setCommitReminder();
-            }
-        });
+			}
+		});
 
-        const workspaceRoot = vscode.workspace.rootPath || '';
+		const workspaceRoot = vscode.workspace.rootPath || '';
 
-        try {
-            // Stage all changes
-            await execPromise('git add .', { cwd: workspaceRoot });
+		try {
+			// Stage all changes
+			await execPromise('git add .', { cwd: workspaceRoot });
 
-            // Commit changes with generated description
-            await execPromise(`git commit -m "${commitDescription}"`, { cwd: workspaceRoot });
+			// Commit changes with generated description
+			await execPromise(`git commit -m "${commitDescription}"`, { cwd: workspaceRoot });
 
-            // Push changes to the repository
-            
+			// Push changes to the repository
 
-            vscode.window.showInformationMessage('Changes committed and pushed successfully');
-        } catch (error) {
-            vscode.window.showErrorMessage('Error committing and pushing changes');
-            console.error('Error committing and pushing changes:', error);
-        }
-    });
 
-    const pushDisposable = vscode.commands.registerCommand('allcommit.push', async () => {
-        const workspaceRoot = vscode.workspace.rootPath || '';
+			vscode.window.showInformationMessage('Changes committed and pushed successfully');
+		} catch (error) {
+			vscode.window.showErrorMessage('Error committing and pushing changes');
+			console.error('Error committing and pushing changes:', error);
+		}
+	});
 
-        try {
-            // Push changes to the repository
-            await execPromise('git push', { cwd: workspaceRoot });
+	const pushDisposable = vscode.commands.registerCommand('allcommit.push', async () => {
+		const workspaceRoot = vscode.workspace.rootPath || '';
 
-            vscode.window.showInformationMessage('Changes pushed successfully');
-            console.log('Changes pushed successfully');
-        } catch (error) {
-            vscode.window.showErrorMessage('Error pushing changes');
-            console.error('Error pushing changes:', error);
-        }
-    });
+		try {
+			// Push changes to the repository
+			await execPromise('git push', { cwd: workspaceRoot });
 
-    const addCommentDisposable = vscode.commands.registerCommand('allcommit.addComment', async () => {
-        const activeEditor = vscode.window.activeTextEditor;
-        if (!activeEditor) {
-            vscode.window.showErrorMessage('No active editor found');
-            return;
-        }
+			vscode.window.showInformationMessage('Changes pushed successfully');
+			console.log('Changes pushed successfully');
+		} catch (error) {
+			vscode.window.showErrorMessage('Error pushing changes');
+			console.error('Error pushing changes:', error);
+		}
+	});
 
-        const document = activeEditor.document;
-        const fileContent = document.getText();
+	const addCommentDisposable = vscode.commands.registerCommand('allcommit.addComment', async () => {
+		const activeEditor = vscode.window.activeTextEditor;
+		if (!activeEditor) {
+			vscode.window.showErrorMessage('No active editor found');
+			return;
+		}
 
-        const comments = await generateComments(fileContent);
-        if (!comments) {
-            vscode.window.showErrorMessage('Failed to generate comments');
-            return;
-        }
+		const document = activeEditor.document;
+		const fileContent = document.getText();
 
-        const edit = new vscode.WorkspaceEdit();
-        const lines = comments.split('\n');
-        lines.forEach((line, index) => {
-            const position = new vscode.Position(index, 0);
-            edit.insert(document.uri, position, line + '\n');
-        });
+		const comments = await generateComments(fileContent);
+		if (!comments) {
+			vscode.window.showErrorMessage('Failed to generate comments');
+			return;
+		}
 
-        await vscode.workspace.applyEdit(edit);
-        vscode.window.showInformationMessage('Comments added successfully');
-    });
+		const edit = new vscode.WorkspaceEdit();
+		const lines = comments.split('\n');
+		lines.forEach((line, index) => {
+			const position = new vscode.Position(index, 0);
+			edit.insert(document.uri, position, line + '\n');
+		});
 
-    context.subscriptions.push(helloWorldDisposable, saveCommitDisposable, pushDisposable, addCommentDisposable);
+		await vscode.workspace.applyEdit(edit);
+		vscode.window.showInformationMessage('Comments added successfully');
+	});
 
-    // Track changes in files
-    vscode.workspace.onDidChangeTextDocument(event => {
-        const fileName = event.document.fileName;
-        if (!changes[fileName]) {
-            changes[fileName] = [];
-        }
-        event.contentChanges.forEach(change => {
-            changes[fileName].push(change.text);
-        });
-        console.log(`Tracked changes for ${fileName}:`, changes[fileName]);
-    });
+	context.subscriptions.push(helloWorldDisposable, saveCommitDisposable, pushDisposable, addCommentDisposable);
 
-    const selectBranchCommand = vscode.commands.registerCommand('allcommit.selectBranch', async () => {
-        const branchName = await vscode.window.showInputBox({ prompt: 'Enter branch name' });
-        if (branchName) {
-            await selectBranch(branchName);
-        }
-    });
+	// Track changes in files
+	vscode.workspace.onDidChangeTextDocument(event => {
+		const fileName = event.document.fileName;
+		if (!changes[fileName]) {
+			changes[fileName] = [];
+		}
+		event.contentChanges.forEach(change => {
+			changes[fileName].push(change.text);
+		});
+		console.log(`Tracked changes for ${fileName}:`, changes[fileName]);
+	});
 
-    const changeLanguageCommand = vscode.commands.registerCommand('allcommit.changeDescriptionLanguage', async () => {
-        const language = await vscode.window.showInputBox({ prompt: 'Enter language code (e.g., en, es, fr)' });
-        if (language) {
-            changeDescriptionLanguage(language);
-        }
-    });
+	const selectBranchCommand = vscode.commands.registerCommand('allcommit.selectBranch', async () => {
+		const branchName = await vscode.window.showInputBox({ prompt: 'Enter branch name' });
+		if (branchName) {
+			await selectBranch(branchName);
+		}
+	});
 
-    let commitAndPushCommand = vscode.commands.registerCommand('extension.commitAndPushChanges', async () => {
-        await commitAndPushChanges();
-    });
+	const changeLanguageCommand = vscode.commands.registerCommand('allcommit.changeDescriptionLanguage', async () => {
+		const language = await vscode.window.showInputBox({ prompt: 'Enter language code (e.g., en, es, fr)' });
+		if (language) {
+			changeDescriptionLanguage(language);
+		}
+	});
+
+	let commitAndPushCommand = vscode.commands.registerCommand('extension.commitAndPushChanges', async () => {
+		await commitAndPushChanges();
+	});
 
 	const codereviewdisposable = vscode.commands.registerCommand('allcommit.codereview', async () => {
 		const activeEditor = vscode.window.activeTextEditor;
@@ -166,18 +166,18 @@ export function activate(context: vscode.ExtensionContext) {
 		const document = activeEditor.document;
 		const fileContent = document.getText();
 
-        const score = await calculate_score(fileContent);
-        if (score === null) {
+		const score = await calculate_score(fileContent);
+		if (score === null) {
 			vscode.window.showErrorMessage('Failed to generate score');
 			return;
 		}
 
-        vscode.window.showInformationMessage(`Code reviews added successfully. Score is ${score}`);
+		vscode.window.showInformationMessage(`Code reviews added successfully. Score is ${score}`);
 	});
 
-    context.subscriptions.push(selectBranchCommand);
-    context.subscriptions.push(changeLanguageCommand);
-    context.subscriptions.push(commitAndPushCommand);
+	context.subscriptions.push(selectBranchCommand);
+	context.subscriptions.push(changeLanguageCommand);
+	context.subscriptions.push(commitAndPushCommand);
 	context.subscriptions.push(codereviewdisposable);
 }
 
