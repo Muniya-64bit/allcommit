@@ -1,71 +1,66 @@
-# allcommit README
+# AllCommit
 
-This is the README for your extension "allcommit". After writing up a brief description, we recommend including the following sections.
+AllCommit is a Visual Studio Code extension that automates the generation of commit descriptions, provides code reviews, and allows users to easily add comments to a file.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
-
-For example if there is an image subfolder under your extension project workspace:
-
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+- **Auto Commit Descriptions**: Automatically generate professional Git commit descriptions.
+- **Code Reviews**: Get a score and feedback on your code quality, readability, and adherence to best practices.
+- **Add Comments**: Automatically add comments to your code.
+- **Branch Management**: Easily switch between branches and push/pull changes.
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+- Visual Studio Code version 1.96.0 or higher.
+- An OpenAI API key stored in a `.env` file with the variable `OPEN_AI`.
+
+## Installation
+
+1. Clone the repository.
+2. Run `npm install` to install the dependencies.
+3. Add your OpenAI API key to a `.env` file in the root of the project:
+    ```
+    OPEN_AI=your_openai_api_key
+    ```
+
+## Usage
+
+### Commands
+
+The extension provides the following commands:
+
+- `AllCommit: Hello World`: Displays a welcome message.
+- `AllCommit: Save Commit`: Saves commit information and generates a commit description.
+- `AllCommit: Push`: Pushes changes to the selected branch.
+- `AllCommit: Add Comments`: Adds comments to the active file.
+- `AllCommit: Select Branch`: Allows you to select a branch to switch to.
+- `AllCommit: Select Your Language`: Changes the language for commit descriptions.
+- `AllCommit: Review Code`: Reviews the code in the active file and provides a score.
+- `AllCommit: Pull`: Pulls changes from the selected branch.
+
+### Running the Extension
+
+1. Press `F5` to open a new window with your extension loaded.
+2. Run your command from the command palette by pressing `Ctrl+Shift+P` (or `Cmd+Shift+P` on Mac) and typing the command name.
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+This extension does not add any VS Code settings through the `contributes.configuration` extension point.
 
 ## Known Issues
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+- None at the moment.
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
+### 0.0.1
 
-### 1.0.0
+- Initial release of AllCommit.
 
-Initial release of ...
+## Contributing
 
-### 1.0.1
+Contributions are welcome! Please open an issue or submit a pull request.
 
-Fixed issue #.
+## License
 
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+This project is licensed under the MIT License.
