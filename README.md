@@ -1,5 +1,7 @@
 # AllCommit
 
+
+![Logo](logo.webp)
 AllCommit is a Visual Studio Code extension that automates the generation of commit descriptions, provides code reviews, and allows users to easily add comments to a file.
 
 ## Features
