@@ -3,12 +3,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { exec } from 'child_process';
 import { v4 as uuidv4 } from 'uuid';
-import dotenv from 'dotenv';
 import util from 'util';
 import { setCommitReminder, calculate_score, generateComments, generateDescription, changeDescriptionLanguage, commitAndPushChanges, selectBranch, } from './fucntions';
 
-
-dotenv.config();
 
 export let lastCommitTime: Date | null = null;
 

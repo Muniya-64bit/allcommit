@@ -5,7 +5,10 @@ import axios from 'axios';
 import { lastCommitTime } from './extension';
 import * as vscode from 'vscode';
 let descriptionLanguage = 'en'; // Default language
+import dotenv from 'dotenv';
 
+dotenv.config();
+const OPEN_AI_API_KEY = process.env.OPEN_AI;
 
 const execPromise = util.promisify(exec);
 // ...existing code...
@@ -22,7 +25,7 @@ export async function calculate_score(fileContent: string): Promise<number | nul
             temperature: 0.7,
         }, {
             headers: {
-                'Authorization': `Bearer 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`
+                'Authorization': `Bearer ${OPEN_AI_API_KEY}`
             }
         });
 
@@ -51,7 +54,7 @@ export async function generateComments(fileContent: string): Promise<string | nu
             temperature: 0.7,
         }, {
             headers: {
-                'Authorization': `Bearer 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`
+                'Authorization': `Bearer ${OPEN_AI_API_KEY}`
             }
 
         });

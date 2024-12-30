@@ -33,7 +33,6 @@ The extension provides the following commands:
 - `AllCommit: Save Commit`: Saves commit information and generates a commit description.
 - `AllCommit: Push`: Pushes changes to the selected branch.
 - `AllCommit: Add Comments`: Adds comments to the active file.
-- `AllCommit: Select Branch`: Allows you to select a branch to switch to.
 - `AllCommit: Select Your Language`: Changes the language for commit descriptions.
 - `AllCommit: Review Code`: Reviews the code in the active file and provides a score.
 - `AllCommit: Pull`: Pulls changes from the selected branch.
