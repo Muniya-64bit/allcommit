@@ -40,6 +40,9 @@
       {
         "command": "allcommit.codereview",
         "title": "Review Code"
+      },{
+        "command": "allcommit.pull",
+        "title": "Pull"
       }
       
     ]

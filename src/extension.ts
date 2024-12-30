@@ -88,39 +88,58 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	const pushDisposable = vscode.commands.registerCommand('allcommit.push', async () => {
-		const workspaceRoot = vscode.workspace.rootPath || '';
-
+		const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || '';
+		if (!workspaceRoot) {
+			vscode.window.showErrorMessage('No workspace folder is open');
+			return;
+		}
+	
 		try {
-			// Get the list of branches
-			const { stdout } = await execPromise('git branch', { cwd: workspaceRoot });
-			const branches = stdout.split('\n').map(branch => branch.trim()).filter(branch => branch);
-
+			// Fetch remote branches to ensure the latest branches are available locally
+			await execPromise('git fetch --all', { cwd: workspaceRoot });
+	
+			// Get the list of branches (local and remote)
+			const { stdout } = await execPromise('git branch -a', { cwd: workspaceRoot });
+			const branches = stdout
+				.split('\n')
+				.map(branch => branch.trim().replace(/^\*\s*/, '')) // Remove '*' from the current branch
+				.filter(branch => branch);
+	
 			// Show the list of branches and prompt the user to select one
 			const selectedBranch = await vscode.window.showQuickPick(branches, {
-				placeHolder: 'Select a branch to push to'
+				placeHolder: 'Select a branch to push to',
 			});
-
+	
 			if (!selectedBranch) {
 				vscode.window.showErrorMessage('Branch selection is required to push changes');
-			} else {
-				try {
-					// Correct the git checkout command
-					await exec(`git checkout ${selectedBranch}`);
-					// Proceed with pushing changes
-					await exec(`git push`);
-					// Show success message
-					vscode.window.showInformationMessage(`Changes pushed to branch ${selectedBranch} successfully`);
-				} catch (error) {
-					const errorMessage = (error as any).message || 'Unknown error';
-					vscode.window.showErrorMessage(`Error pushing changes: ${errorMessage}`);
-				}
+				return;
+			}
+	
+			try {
+				// If the branch is remote (e.g., "remotes/origin/branch-name"), switch to the local equivalent
+				const cleanedBranch = selectedBranch.replace(/^remotes\/origin\//, '');
+	
+				// Create and switch to the branch locally if it doesn’t exist
+				await execPromise(`git switch ${cleanedBranch} || git checkout -b ${cleanedBranch} origin/${cleanedBranch}`, {
+					cwd: workspaceRoot,
+				});
+	
+				// Push changes
+				await execPromise(`git push origin ${cleanedBranch}`, { cwd: workspaceRoot });
+	
+				// Show success message
+				vscode.window.showInformationMessage(`Changes pushed to branch ${cleanedBranch} successfully`);
+			} catch (error) {
+				console.error('Error pushing changes:', error);
+				vscode.window.showErrorMessage(`Error pushing changes: ${(error as any).message || 'Unknown error'}`);
 			}
 		} catch (error) {
-			vscode.window.showErrorMessage('Error pushing changes');
-			console.error('Error pushing changes:', error);
+			console.error('Error fetching branches:', error);
+			vscode.window.showErrorMessage('Error fetching branches');
 		}
 	});
-
+	
+	
 	const addCommentDisposable = vscode.commands.registerCommand('allcommit.addComment', async () => {
 		const activeEditor = vscode.window.activeTextEditor;
 		if (!activeEditor) {
@@ -148,7 +167,49 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.window.showInformationMessage('Comments added successfully');
 	});
 
-	context.subscriptions.push(helloWorldDisposable, saveCommitDisposable, pushDisposable, addCommentDisposable);
+	const pullDisposable = vscode.commands.registerCommand('allcommit.pull', async () => {
+		const workspaceRoot = vscode.workspace.rootPath || '';
+	
+		try {
+			// Fetch remote branches to ensure the latest branches are available locally
+			await execPromise('git fetch --all', { cwd: workspaceRoot });
+	
+			// Get the list of branches (local and remote)
+			const { stdout } = await execPromise('git branch -a', { cwd: workspaceRoot });
+			const branches = stdout
+				.split('\n')
+				.map(branch => branch.trim().replace(/^\*\s*/, '')) // Remove '*' from the current branch
+				.filter(branch => branch);
+	
+			// Show the list of branches and prompt the user to select one
+			const selectedBranch = await vscode.window.showQuickPick(branches, {
+				placeHolder: 'Select a branch to pull from',
+			});
+	
+			if (!selectedBranch) {
+				vscode.window.showErrorMessage('Branch selection is required to pull changes');
+				return;
+			}
+	
+			try {
+				// If the branch is remote (e.g., "remotes/origin/branch-name"), switch to the local equivalent
+				const localBranch = selectedBranch.replace('remotes/origin/', '');
+				await execPromise(`git checkout ${localBranch}`, { cwd: workspaceRoot });
+				// Proceed with pulling changes
+				await execPromise(`git pull origin ${localBranch}`, { cwd: workspaceRoot });
+				// Show success message
+				vscode.window.showInformationMessage(`Changes pulled from branch ${localBranch} successfully`);
+			} catch (error) {
+				const errorMessage = (error as any).message || 'Unknown error';
+				vscode.window.showErrorMessage(`Error pulling changes: ${errorMessage}`);
+			}
+		} catch (error) {
+			vscode.window.showErrorMessage('Error pulling changes');
+			console.error('Error pulling changes:', error);
+		}
+	});
+	
+	context.subscriptions.push(helloWorldDisposable, saveCommitDisposable, pushDisposable, addCommentDisposable, pullDisposable);
 
 	// Track changes in files
 	vscode.workspace.onDidChangeTextDocument(event => {
