@@ -50,7 +50,7 @@ This extension does not add any VS Code settings through the `contributes.config
 
 ## Known Issues
 
-- None at the moment.
+- maybe env openai key not properly imported to src
 
 ## Release Notes
 
