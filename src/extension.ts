@@ -6,8 +6,9 @@ import { v4 as uuidv4 } from 'uuid';
 import dotenv from 'dotenv';
 import util from 'util';
 
-import {calculate_score,generateComments,generateDescription,changeDescriptionLanguage,commitAndPushChanges, selectBranch,} from './fucntions';
+import {setCommitReminder,calculate_score,generateComments,generateDescription,changeDescriptionLanguage,commitAndPushChanges, selectBranch,} from './fucntions';
 dotenv.config();
+export let lastCommitTime: Date | null = null;
 const execPromise = util.promisify(exec);
 export let changes: { [key: string]: string[] } = {};
 export function clearChanges() {
@@ -57,6 +58,8 @@ export function activate(context: vscode.ExtensionContext) {
             } else {
                 vscode.window.showInformationMessage('Commit information saved successfully');
                 clearChanges();
+				lastCommitTime = new Date();
+				setCommitReminder();
             }
         });
 
@@ -163,8 +166,8 @@ export function activate(context: vscode.ExtensionContext) {
 		const document = activeEditor.document;
 		const fileContent = document.getText();
 
-        const score: number = await calculate_score(fileContent);
-		if (!score) {
+        const score = await calculate_score(fileContent);
+        if (score === null) {
 			vscode.window.showErrorMessage('Failed to generate score');
 			return;
 		}

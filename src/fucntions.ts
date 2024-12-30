@@ -2,6 +2,8 @@ import { exec } from 'child_process';
 import util from 'util';
 import { changes } from './extension';
 import axios from 'axios';
+import { lastCommitTime } from './extension';
+import * as vscode from 'vscode';
 let descriptionLanguage = 'en'; // Default language
 
 
@@ -146,4 +148,26 @@ export function description_writer() {
 // This method is called when your extension is deactivated
 export function deactivate() {
     console.log('Bye, your extension "gitai" is now deactive!');
+}
+
+
+export function setCommitReminder() {
+    if (lastCommitTime) {
+        const oneHour = 60 * 60 * 1000; // One hour in milliseconds
+        const timeSinceLastCommit = new Date().getTime() - lastCommitTime.getTime();
+
+        if (timeSinceLastCommit >= oneHour) {
+            vscode.window.showInformationMessage('It has been an hour since your last commit. Consider committing your changes.');
+        } else {
+            const timeUntilReminder = oneHour - timeSinceLastCommit;
+            setTimeout(() => {
+                vscode.window.showInformationMessage('It has been an hour since your last commit. Consider committing your changes.');
+            }, timeUntilReminder);
+        }
+    } else {
+        // If no last commit time is set, set a reminder for one hour from now
+        setTimeout(() => {
+            vscode.window.showInformationMessage('It has been an hour since your last commit. Consider committing your changes.');
+        }, 60 * 60 * 1000);
+    }
 }
