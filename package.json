@@ -16,7 +16,32 @@
       {
         "command": "allcommit.helloWorld",
         "title": "Hello World"
+      },
+      {
+        "command": "allcommit.saveCommit",
+        "title": "Save Commit"
+      },
+      {
+        "command": "allcommit.push",
+        "title": "Push"
+      },
+      {
+        "command": "allcommit.addComment",
+        "title": "Add Comments"
+      },
+      {
+        "command": "allcommit.selectBranch",
+        "title": "Select Branch"
+      },
+      {
+        "command": "allcommit.changeDescriptionLanguage",
+        "title": "Select Your Language"
+      },
+      {
+        "command": "allcommit.codereview",
+        "title": "Review Code"
       }
+      
     ]
   },
   "scripts": {
@@ -42,6 +67,7 @@
   },
   "dependencies": {
     "axios": "^1.7.9",
+    "dotenv": "^16.4.7",
     "uuid": "^11.0.3"
   }
 }
