@@ -5,12 +5,17 @@ import { exec } from 'child_process';
 import { v4 as uuidv4 } from 'uuid';
 import dotenv from 'dotenv';
 import util from 'util';
-
 import { setCommitReminder, calculate_score, generateComments, generateDescription, changeDescriptionLanguage, commitAndPushChanges, selectBranch, } from './fucntions';
+
+
 dotenv.config();
+
 export let lastCommitTime: Date | null = null;
+
 const execPromise = util.promisify(exec);
+
 export let changes: { [key: string]: string[] } = {};
+
 export function clearChanges() {
 	console.log('Clearing changes:', changes);
 	changes = {};
@@ -86,11 +91,30 @@ export function activate(context: vscode.ExtensionContext) {
 		const workspaceRoot = vscode.workspace.rootPath || '';
 
 		try {
-			// Push changes to the repository
-			await execPromise('git push', { cwd: workspaceRoot });
+			// Get the list of branches
+			const { stdout } = await execPromise('git branch', { cwd: workspaceRoot });
+			const branches = stdout.split('\n').map(branch => branch.trim()).filter(branch => branch);
 
-			vscode.window.showInformationMessage('Changes pushed successfully');
-			console.log('Changes pushed successfully');
+			// Show the list of branches and prompt the user to select one
+			const selectedBranch = await vscode.window.showQuickPick(branches, {
+				placeHolder: 'Select a branch to push to'
+			});
+
+			if (!selectedBranch) {
+				vscode.window.showErrorMessage('Branch selection is required to push changes');
+			} else {
+				try {
+					// Correct the git checkout command
+					await exec(`git checkout ${selectedBranch}`);
+					// Proceed with pushing changes
+					await exec(`git push`);
+					// Show success message
+					vscode.window.showInformationMessage(`Changes pushed to branch ${selectedBranch} successfully`);
+				} catch (error) {
+					const errorMessage = (error as any).message || 'Unknown error';
+					vscode.window.showErrorMessage(`Error pushing changes: ${errorMessage}`);
+				}
+			}
 		} catch (error) {
 			vscode.window.showErrorMessage('Error pushing changes');
 			console.error('Error pushing changes:', error);
